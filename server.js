@@ -107,7 +107,31 @@ app.post("/api/exercise/add", (req, res) => {
 })
 
 app.get('/api/exercise/log', (req, res) => {
-  res.send('working');
+  let log = [];
+  let limit = req.query.limit;
+  let from = req.query.from;
+  let to = req.query.to;
+  User.findOne({_id: req.query.userId}, (err, data) => {
+    if (err) {
+      res.send(err);
+    }
+    log = data.exercises.slice();
+    if (from && !to) {
+      log = log.map(item => item.date > from);
+    } else if (!from && to) {
+      log = log.map(item => item.date < to);
+    } else if (from && to) {
+      log = log.map(item => item.date > from && item.date < to);
+    }
+    if (limit) {
+      log = log.slice(0, limit);
+    }
+    res.send({
+      username: data.username, 
+      _id: data._id, 
+      count: data.exercises.length,
+      log: log});
+  })
 })
 
 
