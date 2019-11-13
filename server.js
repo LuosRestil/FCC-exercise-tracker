@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
-//Setting up user database
+//Setting up database
 mongoose
   .connect(process.env.ATLAS_URI, {
     useUnifiedTopology: true,
@@ -26,10 +26,9 @@ mongoose
   });
 
 let exerciseSchema = new mongoose.Schema({
-  userId: { type: String, required: true },
   description: { type: String, required: true },
   duration: { type: Number, required: true },
-  date: Date
+  date: { type: Date, default: Date.now()}
 });
 
 let userSchema = new mongoose.Schema({
@@ -44,11 +43,9 @@ let User = mongoose.model("User", userSchema);
 // app.use((req, res, next) => {
 //   return next({status: 404, message: 'not found'})
 // })
-
 // Error Handling middleware
 // app.use((err, req, res, next) => {
 //   let errCode, errMessage
-
 //   if (err.errors) {
 //     // mongoose validation error
 //     errCode = 400 // bad request
@@ -83,10 +80,36 @@ app.get("/api/exercise/users", (req, res) => {
     let userArray = [];
     users.forEach(user => {
       userArray.push({username: user.username, _id: user._id});
-    })
+    });
     res.send(userArray)
-  })
+  });
+});
+
+app.post("/api/exercise/add", (req, res) => {
+  if (req.body.date) {
+    User.findOneAndUpdate({_id: req.body.userId},{$push: {exercises:{
+      description: req.body.description, 
+      duration: req.body.duration, 
+      date: req.body.date
+    }}},{ "new": true, "upsert": true },(err, data) => {
+    if (err) return res.send(err);
+    res.send(data)
+    })
+  } else {
+    User.findOneAndUpdate({_id: req.body.userId},{$push: {exercises:{
+      description: req.body.description, 
+      duration: req.body.duration
+    }}},{ "new": true, "upsert": true },(err, data) => {
+    if (err) return res.send(err);
+    res.send(data)
+    })
+  }
 })
+
+app.get('/api/exercise/log', (req, res) => {
+  res.send('working');
+})
+
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
