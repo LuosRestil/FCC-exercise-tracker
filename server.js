@@ -108,24 +108,24 @@ app.post("/api/exercise/add", (req, res) => {
 
 app.get('/api/exercise/log', (req, res) => {
   let log = [];
-  let limit = req.query.limit;
-  let from = req.query.from;
-  let to = req.query.to;
+  let qLimit = req.query.limit;
+  let qFrom = req.query.from;
+  let qTo = req.query.to;
   User.findOne({_id: req.query.userId}, (err, data) => {
     if (err) {
       res.send(err);
     }
     log = data.exercises.slice();
-    if (from && !to) {
-      log = log.filter(item => new Date(item.date).getTime() > new Date(from).getTime());
-    } else if (!from && to) {
-      log = log.filter(item => new Date(item.date).getTime() < new Date(to).getTime());
-    } else if (from && to) {
-      log = log.filter(item => new Date(item.date).getTime() > new Date(from).getTime() 
-                    && new Date(item.date).getTime() < new Date(to).getTime());
+    if (qFrom && !qTo) {
+      log = log.filter(item => new Date(item.date).getTime() > new Date(qFrom).getTime());
+    } else if (!qFrom && qTo) {
+      log = log.filter(item => new Date(item.date).getTime() < new Date(qTo).getTime());
+    } else if (qFrom && qTo) {
+      log = log.filter(item => new Date(item.date).getTime() > new Date(qFrom).getTime() 
+                    && new Date(item.date).getTime() < new Date(qTo).getTime());
     }
-    if (limit) {
-      log = log.slice(0, limit);
+    if (qLimit) {
+      log = log.slice(0, qLimit);
     }
     res.send({
       username: data.username, 
