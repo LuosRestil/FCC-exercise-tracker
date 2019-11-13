@@ -117,11 +117,12 @@ app.get('/api/exercise/log', (req, res) => {
     }
     log = data.exercises.slice();
     if (from && !to) {
-      log = log.map(item => item.date > from);
+      log = log.filter(item => new Date(item.date).getTime() > new Date(from).getTime());
     } else if (!from && to) {
-      log = log.map(item => item.date < to);
+      log = log.filter(item => new Date(item.date).getTime() < new Date(to).getTime());
     } else if (from && to) {
-      log = log.map(item => item.date > from && item.date < to);
+      log = log.filter(item => new Date(item.date).getTime() > new Date(from).getTime() 
+                    && new Date(item.date).getTime() < new Date(to).getTime());
     }
     if (limit) {
       log = log.slice(0, limit);
@@ -130,7 +131,8 @@ app.get('/api/exercise/log', (req, res) => {
       username: data.username, 
       _id: data._id, 
       count: data.exercises.length,
-      log: log});
+      log: log
+    });
   })
 })
 
